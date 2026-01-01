@@ -5,6 +5,7 @@ import {
   getModule,
   searchModules,
   formatCode,
+  getSymbolSource,
   getHelp,
   state
 } from "../src/tools.js";
@@ -82,6 +83,20 @@ async function runTests() {
   await test("getHelp should return docs", () => {
     const doc = getHelp("deobfuscate");
     expect(doc).toContain("Tool: deobfuscate");
+  });
+
+  await test("getSymbolSource should extract function code", async () => {
+    const code = "function test() { return 1; } const other = 2;";
+    const result = await getSymbolSource("test", code);
+    expect(result).toContain("function test()");
+    if (result.includes("const other = 2;")) throw new Error("Should not contain other code");
+  });
+
+  await test("getSymbolSource should extract variable declaration", async () => {
+    const code = "const myVar = { a: 1 }; function x() {}";
+    const result = await getSymbolSource("myVar", code);
+    expect(result).toContain("const myVar = {");
+    if (result.includes("function x()")) throw new Error("Should not contain other code");
   });
 
   await test("deobfuscate should process simple code", async () => {

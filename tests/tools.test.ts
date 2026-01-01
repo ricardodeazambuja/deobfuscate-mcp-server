@@ -5,6 +5,7 @@ import {
   getModule,
   searchModules,
   formatCode,
+  getSymbolSource,
   getHelp,
   state
 } from "../src/tools.js";
@@ -48,6 +49,20 @@ describe("Minified MCP Tools", () => {
     const doc = getHelp("deobfuscate");
     expect(doc).toContain("Tool: deobfuscate");
     expect(() => getHelp("nonexistent")).toThrow();
+  });
+
+  test("getSymbolSource should extract function code", async () => {
+    const code = "function test() { return 1; } const other = 2;";
+    const result = await getSymbolSource("test", code);
+    expect(result).toContain("function test()");
+    expect(result).not.toContain("const other = 2;");
+  });
+
+  test("getSymbolSource should extract variable declaration", async () => {
+    const code = "const myVar = { a: 1 }; function x() {}";
+    const result = await getSymbolSource("myVar", code);
+    expect(result).toContain("const myVar = {");
+    expect(result).not.toContain("function x()");
   });
 
   describe("Bundle Operations", () => {

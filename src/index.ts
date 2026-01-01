@@ -9,6 +9,7 @@ import {
   getModule,
   searchModules,
   formatCode,
+  getSymbolSource,
   getHelp,
   TOOL_DOCS,
   MAX_CODE_SIZE
@@ -81,6 +82,20 @@ server.tool(
   async ({ code, limit }) => {
     const structure = await analyzeStructure(code, limit);
     return { content: [{ type: "text", text: JSON.stringify(structure, null, 2) }] };
+  }
+);
+
+server.tool(
+  "get_symbol_source",
+  "Extracts specific function/class source code. (See get_help)",
+  {
+    symbolName: z.string(),
+    code: z.string().optional(),
+    moduleId: z.string().optional()
+  },
+  async ({ symbolName, code, moduleId }) => {
+    const result = await getSymbolSource(symbolName, code, moduleId);
+    return { content: [{ type: "text", text: result }] };
   }
 );
 

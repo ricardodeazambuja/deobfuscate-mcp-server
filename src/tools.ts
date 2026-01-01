@@ -78,8 +78,72 @@ Tool: get_help
 Description: Returns detailed documentation for a specific tool.
 Input:
 - tool_name (string): The name of the tool to get help for.
+`,
+  get_symbol_source: `
+Tool: get_symbol_source
+Description: Extracts the source code of a specific function, class, or variable from a module or provided code snippet.
+Input:
+- symbolName (string): The name of the symbol to extract.
+- code (string): Optional. The source code to search in.
+- moduleId (string): Optional. The ID of the module in the cached bundle to search in.
+Key Behavior:
+- Saves tokens by returning only the requested symbol instead of the entire file.
+- Uses AST parsing to accurately locate the symbol.
 `
 };
+
+export async function getSymbolSource(symbolName: string, code?: string, moduleId?: string) {
+  let sourceCode = code;
+  if (moduleId) {
+    if (!state.lastBundle) throw new Error('No bundle cached. Run deobfuscate first.');
+    const mod = state.lastBundle.modules.get(moduleId);
+    if (!mod) throw new Error(`Module ${moduleId} not found.`);
+    sourceCode = mod.code;
+  }
+
+  if (!sourceCode) throw new Error("Either 'code' or 'moduleId' must be provided.");
+
+  const ast = parser.parse(sourceCode, {
+    sourceType: 'module',
+    plugins: ['jsx', 'typescript'],
+  });
+
+  let foundCode: string | null = null;
+
+  traverse(ast, {
+    enter(path) {
+      if (foundCode) return;
+
+      let match = false;
+      if (path.isFunctionDeclaration() || path.isClassDeclaration()) {
+        if (path.node.id?.name === symbolName) match = true;
+      } else if (path.isVariableDeclarator()) {
+        if (t.isIdentifier(path.node.id) && path.node.id.name === symbolName) {
+          // If it's a variable declarator, we might want the whole declaration (const/let)
+          if (path.parentPath.isVariableDeclaration()) {
+            path = path.parentPath;
+          }
+          match = true;
+        }
+      }
+
+      if (match) {
+        const { start, end } = path.node;
+        if (start !== null && end !== null) {
+          foundCode = sourceCode!.slice(start, end);
+        }
+      }
+    },
+  });
+
+  if (!foundCode) throw new Error(`Symbol '${symbolName}' not found.`);
+
+  return await format(foundCode, {
+    parser: 'babel',
+    semi: true,
+    singleQuote: true,
+  });
+}
 
 export async function analyzeStructure(code: string, limit: number = 50) {
   try {

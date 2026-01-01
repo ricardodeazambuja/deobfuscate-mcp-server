@@ -21,11 +21,66 @@ Standard "beautifiers" only format code, leaving LLMs to struggle with massive, 
 - **`format_code`**: Standard Prettier formatting for JS/HTML/CSS.
 - **`get_help`**: Returns detailed documentation for any tool.
 
-## Installation
+## Installation & Setup
 
+### Build from source
 ```bash
 npm install
 npm run build
+```
+
+### Pack and Install (Optional)
+To create a distributable tarball and install it globally:
+```bash
+npm pack
+npm install -g ./minified-mcp-server-1.0.0.tgz
+```
+
+## Client Configuration
+
+To use this server with your favorite LLM client, add the following configuration. Replace `ABSOLUTE_PATH_TO_DIST` with the actual absolute path to `dist/index.js` on your machine.
+
+### Claude Code
+Run the following command in your terminal:
+```bash
+claude mcp add minified-mcp-server -- node ABSOLUTE_PATH_TO_DIST/index.js
+```
+Alternatively, edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "minified-mcp-server": {
+      "command": "node",
+      "args": ["ABSOLUTE_PATH_TO_DIST/index.js"]
+    }
+  }
+}
+```
+
+### Gemini CLI
+Edit `~/.gemini/settings.json`:
+```json
+{
+  "mcpServers": {
+    "minified-mcp-server": {
+      "command": "node",
+      "args": ["ABSOLUTE_PATH_TO_DIST/index.js"]
+    }
+  }
+}
+```
+
+### Antigravity
+Google Antigravity typically uses a similar configuration to Gemini. Edit `~/.antigravity/settings.json` (or use the integrated MCP Store UI to add a custom server):
+```json
+{
+  "mcpServers": {
+    "minified-mcp-server": {
+      "command": "node",
+      "args": ["ABSOLUTE_PATH_TO_DIST/index.js"]
+    }
+  }
+}
 ```
 
 ## Usage

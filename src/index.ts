@@ -15,7 +15,7 @@ import {
 } from "./tools.js";
 
 const server = new McpServer({
-  name: "minified-mcp-server",
+  name: "deobfuscate-mcp-server",
   version: "1.0.0",
 });
 
@@ -112,7 +112,7 @@ server.tool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Minified MCP Server running on stdio");
+  console.error("Deobfuscate MCP Server running on stdio");
 }
 
 main().catch((error) => {

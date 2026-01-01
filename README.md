@@ -1,4 +1,4 @@
-# Minified Code MCP Server
+# Deobfuscate MCP Server
 
 An **LLM-Optimized** Model Context Protocol (MCP) server designed to help Large Language Models reverse-engineer, navigate, and understand minified and bundled JavaScript code.
 
@@ -33,7 +33,7 @@ npm run build
 To create a distributable tarball and install it globally:
 ```bash
 npm pack
-npm install -g ./minified-mcp-server-1.0.0.tgz
+npm install -g ./deobfuscate-mcp-server-1.0.0.tgz
 ```
 
 ## Client Configuration
@@ -43,13 +43,13 @@ To use this server with your favorite LLM client, add the following configuratio
 ### Claude Code
 Run the following command in your terminal:
 ```bash
-claude mcp add minified-mcp-server -- node ABSOLUTE_PATH_TO_DIST/index.js
+claude mcp add deobfuscate-mcp-server -- node ABSOLUTE_PATH_TO_DIST/index.js
 ```
 Alternatively, edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "minified-mcp-server": {
+    "deobfuscate-mcp-server": {
       "command": "node",
       "args": ["ABSOLUTE_PATH_TO_DIST/index.js"]
     }
@@ -62,7 +62,7 @@ Edit `~/.gemini/settings.json`:
 ```json
 {
   "mcpServers": {
-    "minified-mcp-server": {
+    "deobfuscate-mcp-server": {
       "command": "node",
       "args": ["ABSOLUTE_PATH_TO_DIST/index.js"]
     }
@@ -75,7 +75,7 @@ Google Antigravity typically uses a similar configuration to Gemini. Edit `~/.an
 ```json
 {
   "mcpServers": {
-    "minified-mcp-server": {
+    "deobfuscate-mcp-server": {
       "command": "node",
       "args": ["ABSOLUTE_PATH_TO_DIST/index.js"]
     }

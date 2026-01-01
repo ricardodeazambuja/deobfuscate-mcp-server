@@ -1,5 +1,5 @@
 {
-  "name": "minified-mcp-server",
+  "name": "deobfuscate-mcp-server",
   "version": "1.0.0",
   "description": "An MCP server to help LLMs de-obfuscate and navigate minified JavaScript bundles.",
   "main": "dist/index.js",
@@ -9,7 +9,7 @@
     "test": "npx tsx tests/run_tests.ts"
   },
   "bin": {
-    "minified-mcp-server": "dist/index.js"
+    "deobfuscate-mcp-server": "dist/index.js"
   },
   "keywords": [
     "mcp",

@@ -75,6 +75,35 @@ describe("Minified MCP Tools", () => {
       expect(result).toContain("function a()");
     });
 
+    test("deobfuscate should unpack a real mock Webpack bundle", async () => {
+      const webpackBundle = `
+        (function(modules) {
+          function __webpack_require__(id) {
+            var module = { exports: {} };
+            modules[id](module, module.exports, __webpack_require__);
+            return module.exports;
+          }
+          return __webpack_require__(0);
+        })([
+          function(module, exports, __webpack_require__) {
+            console.log("entry point");
+            __webpack_require__(1);
+          },
+          function(module, exports, __webpack_require__) {
+            console.log("module 1");
+          }
+        ]);
+      `;
+      const result = await deobfuscate(webpackBundle, true);
+      expect(result).toContain("Unbundled");
+      
+      const modules = await listModules();
+      expect(modules.length).toBeGreaterThanOrEqual(2);
+      
+      const mod1 = await getModule(modules[1].id);
+      expect(mod1).toContain("console.log('module 1')");
+    });
+
     test("listModules should fail if no bundle exists", async () => {
       await expect(listModules()).rejects.toThrow("No bundle found");
     });

@@ -102,7 +102,42 @@ async function runTests() {
   await test("deobfuscate should process simple code", async () => {
     const code = "function a(){ console.log('test') }";
     const result = await deobfuscate(code, false);
-    expect(result).toContain("function a()")
+    expect(result).toContain("function a()");
+  });
+
+  await test("deobfuscate should actually unpack a mock Webpack bundle", async () => {
+    const webpackBundle = `
+      (function(modules) {
+        function __webpack_require__(id) {
+          var module = { exports: {} };
+          modules[id](module, module.exports, __webpack_require__);
+          return module.exports;
+        }
+        return __webpack_require__(0);
+      })([
+        function(module, exports, __webpack_require__) {
+          console.log("entry point");
+          __webpack_require__(1);
+        },
+        function(module, exports, __webpack_require__) {
+          console.log("module 1");
+        }
+      ]);
+    `;
+    
+    // This executes real webcrack logic
+    const result = await deobfuscate(webpackBundle, true);
+    
+    // Check if webcrack identified the modules
+    expect(result).toContain("Unbundled");
+    
+    // Verify list_modules works on the REAL output from webcrack
+    const modules = await listModules();
+    if (modules.length < 2) throw new Error(`Expected at least 2 modules, got ${modules.length}`);
+    
+    // Verify we can get the code for one of the unpacked modules
+    const mod1 = await getModule(modules[1].id);
+    expect(mod1).toContain("console.log('module 1')");
   });
 
   await test("listModules should fail if no bundle", async () => {

@@ -82,7 +82,11 @@ Alternatively, edit `~/.gemini/settings.json`:
 ```
 
 ### Antigravity
-Google Antigravity typically uses a similar configuration to Gemini. Edit `~/.antigravity/settings.json` (or use the integrated MCP Store UI to add a custom server):
+Run the following command in your terminal:
+```bash
+antigravity --add-mcp '{"deobfuscate-mcp-server": {"command": "npx", "args": ["-y", "deobfuscate-mcp-server"]}}'
+```
+Alternatively, edit `~/.antigravity/settings.json`:
 ```json
 {
   "mcpServers": {

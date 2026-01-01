@@ -1,0 +1,50 @@
+{
+  "name": "minified-mcp-server",
+  "version": "1.0.0",
+  "description": "An MCP server to help LLMs de-obfuscate and navigate minified JavaScript bundles.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "npx tsx tests/run_tests.ts"
+  },
+  "bin": {
+    "minified-mcp-server": "dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "llm",
+    "deobfuscator",
+    "minified",
+    "webcrack",
+    "reverse-engineering"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@types/babel__traverse": "^7.28.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.0.3",
+    "@types/prettier": "^2.7.3",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.28.5",
+    "@babel/traverse": "^7.28.5",
+    "@babel/types": "^7.28.5",
+    "@modelcontextprotocol/sdk": "^1.25.1",
+    "prettier": "^3.7.4",
+    "webcrack": "^2.15.1",
+    "zod": "^4.3.2"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}

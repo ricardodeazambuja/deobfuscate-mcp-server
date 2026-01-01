@@ -14,8 +14,14 @@ Standard "beautifiers" only format code, leaving LLMs to struggle with massive, 
 ## Features
 
 - **`deobfuscate`**: The entry point. Unpacks bundles and caches them in memory.
+    - **`returnCode`** (default `false`): Returns a summary by default to save context. Set to `true` to see the full code.
+    - **`skipVendor`**: Filter out `node_modules` and webpack boilerplate to focus on app code.
+    - **`mangle`**: Shorten variable names to save tokens.
+    - **`jsx`**: Restore React JSX syntax.
 - **`analyze_structure`**: Returns a high-level AST summary (functions, classes, exports) to save tokens.
 - **`list_modules`**: Lists all modules found in the unpacked bundle.
+- **`list_functions`**: Scans cached modules to list defined functions/classes with signatures and parameters.
+- **`get_call_graph`**: Generates a call graph for a specific function, identifying what it calls and what calls it.
 - **`get_module`**: Fetches the formatted source code of a single module.
 - **`get_symbol_source`**: Extracts only a specific function, class, or variable to save tokens.
 - **`search_modules`**: Regex/String search across all modules.
@@ -118,8 +124,8 @@ node dist/index.js
 ### Example Workflow for an LLM
 
 1.  **User**: "Analyze this minified file: `bundle.min.js`..."
-2.  **LLM**: Calls `deobfuscate(code="...")`.
-    *   *Server*: "Unbundled 150 modules. Main entry point returned."
+2.  **LLM**: Calls `deobfuscate(code="...", skipVendor=true)`.
+    *   *Server*: "Deobfuscation complete. Unbundled 15 modules. Skipped 45 vendor modules..."
 3.  **LLM**: "Okay, I see the entry point requires module 42. What is that?"
 4.  **LLM**: Calls `get_module(id="42")`.
     *   *Server*: Returns code for module 42.

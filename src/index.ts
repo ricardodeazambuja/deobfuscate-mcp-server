@@ -8,6 +8,8 @@ import {
   listModules,
   getModule,
   searchModules,
+  listFunctions,
+  getCallGraph,
   formatCode,
   getSymbolSource,
   getHelp,
@@ -26,11 +28,16 @@ server.tool(
   "deobfuscate",
   "Unpacks/deobfuscates minified code & caches result.",
   {
-    code: z.string().max(MAX_CODE_SIZE, `Input code too large (max ${MAX_CODE_SIZE / 1024 / 1024}MB)`),
-    unbundle: z.boolean().optional().default(true)
+    code: z.string().max(MAX_CODE_SIZE, `Input code too large (max ${MAX_CODE_SIZE / 1024 / 1024}MB)`).optional(),
+    filePath: z.string().optional(),
+    unbundle: z.boolean().optional().default(true),
+    returnCode: z.boolean().optional().default(false),
+    mangle: z.boolean().optional().default(false),
+    jsx: z.boolean().optional().default(true),
+    skipVendor: z.boolean().optional().default(false)
   },
-  async ({ code, unbundle }) => {
-    const result = await deobfuscate(code, unbundle);
+  async ({ code, filePath, unbundle, returnCode, mangle, jsx, skipVendor }) => {
+    const result = await deobfuscate(code, unbundle, filePath, returnCode, mangle, jsx, skipVendor);
     return { content: [{ type: "text", text: result }] };
   }
 );
@@ -74,14 +81,42 @@ server.tool(
 );
 
 server.tool(
+  "list_functions",
+  "Scans cached modules to list defined functions and classes.",
+  {
+    moduleId: z.string().optional(),
+    limit: z.number().optional().default(DEFAULT_LIMIT)
+  },
+  async ({ moduleId, limit }) => {
+    const results = await listFunctions(moduleId, limit);
+    return { content: [{ type: "text", text: JSON.stringify(results, null, 2) }] };
+  }
+);
+
+server.tool(
+  "get_call_graph",
+  "Generates a call graph for a specific function.",
+  {
+    symbolName: z.string(),
+    moduleId: z.string(),
+    scanAllModules: z.boolean().optional().default(false)
+  },
+  async ({ symbolName, moduleId, scanAllModules }) => {
+    const graph = await getCallGraph(symbolName, moduleId, scanAllModules);
+    return { content: [{ type: "text", text: JSON.stringify(graph, null, 2) }] };
+  }
+);
+
+server.tool(
   "analyze_structure",
   "Returns structural summary (AST) of code.",
   {
-    code: z.string().max(MAX_CODE_SIZE, `Input code too large (max ${MAX_CODE_SIZE / 1024 / 1024}MB)`),
+    code: z.string().max(MAX_CODE_SIZE, `Input code too large (max ${MAX_CODE_SIZE / 1024 / 1024}MB)`).optional(),
+    filePath: z.string().optional(),
     limit: z.number().optional().default(DEFAULT_LIMIT)
   },
-  async ({ code, limit }) => {
-    const structure = await analyzeStructure(code, limit);
+  async ({ code, filePath, limit }) => {
+    const structure = await analyzeStructure(code, limit, filePath);
     return { content: [{ type: "text", text: JSON.stringify(structure, null, 2) }] };
   }
 );
@@ -92,10 +127,11 @@ server.tool(
   {
     symbolName: z.string(),
     code: z.string().optional(),
+    filePath: z.string().optional(),
     moduleId: z.string().optional()
   },
-  async ({ symbolName, code, moduleId }) => {
-    const result = await getSymbolSource(symbolName, code, moduleId);
+  async ({ symbolName, code, filePath, moduleId }) => {
+    const result = await getSymbolSource(symbolName, code, moduleId, filePath);
     return { content: [{ type: "text", text: result }] };
   }
 );
@@ -104,11 +140,12 @@ server.tool(
   "format_code",
   "Formats code with Prettier.",
   {
-    code: z.string().max(MAX_CODE_SIZE, `Input code too large (max ${MAX_CODE_SIZE / 1024 / 1024}MB)`),
+    code: z.string().max(MAX_CODE_SIZE, `Input code too large (max ${MAX_CODE_SIZE / 1024 / 1024}MB)`).optional(),
+    filePath: z.string().optional(),
     parser: z.enum(["babel", "html", "css"]).optional().default("babel")
   },
-  async ({ code, parser }) => {
-    const formatted = await formatCode(code, parser);
+  async ({ code, filePath, parser }) => {
+    const formatted = await formatCode(code, parser, filePath);
     return { content: [{ type: "text", text: formatted }] };
   }
 );

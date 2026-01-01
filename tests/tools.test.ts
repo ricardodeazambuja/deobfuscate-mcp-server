@@ -71,8 +71,26 @@ describe("Minified MCP Tools", () => {
     const simpleCode = "function a(){ console.log('test') }";
 
     test("deobfuscate should process simple code", async () => {
-      const result = await deobfuscate(simpleCode, false);
+      const result = await deobfuscate(simpleCode, false, undefined, true);
       expect(result).toContain("function a()");
+      
+      // Verify that even with unbundle=false, we have an entry module
+      const modules = await listModules();
+      expect(modules).toHaveLength(1);
+      expect(modules[0].id).toBe("(entry)");
+    });
+
+    test("search_modules should work on main code when unbundling is disabled", async () => {
+      await deobfuscate(simpleCode, false);
+      const results = await searchModules("console.log");
+      expect(results.length).toBeGreaterThan(0);
+      expect(results[0].id).toBe("(entry)");
+    });
+
+    test("deobfuscate should return summary by default", async () => {
+      const result = await deobfuscate(simpleCode, false);
+      expect(result).toContain("Deobfuscation complete");
+      expect(result).not.toContain("function a()");
     });
 
     test("deobfuscate should unpack a real mock Webpack bundle", async () => {
@@ -94,7 +112,7 @@ describe("Minified MCP Tools", () => {
           }
         ]);
       `;
-      const result = await deobfuscate(webpackBundle, true);
+      const result = await deobfuscate(webpackBundle, true, undefined, true);
       expect(result).toContain("Unbundled");
       
       const modules = await listModules();

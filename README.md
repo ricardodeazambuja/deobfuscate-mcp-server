@@ -52,3 +52,8 @@ node dist/index.js
 
 - **Build**: `npm run build`
 - **Test**: `npm test`
+
+## Limits
+
+- **File Size**: The server accepts input files (bundles) up to **50MB**.
+- **Memory**: Unbundled modules are cached in RAM. Very large bundles (hundreds of MBs unpacked) may exhaust the server's available memory depending on your environment.

@@ -22,7 +22,7 @@ Key Behavior:
 - Caches the unbundled modules in memory for subsequent use by 'list_modules', 'get_module', and 'search_modules'.
 - Returns the main entry point code and a summary of the operation.
 Input:
-- code (string): The raw minified code.
+- code (string): The raw minified code (Max 50MB).
 - unbundle (boolean): Default true. Set to false if you only want variable renaming without bundle splitting.
 `,
   list_modules: `
@@ -59,7 +59,7 @@ Key Behavior:
 Tool: analyze_structure
 Description: Performs a static analysis (AST) of the provided code to generate a high-level architectural summary.
 Input:
-- code (string): The JS code to analyze.
+- code (string): The JS code to analyze (Max 50MB).
 - limit (number): Optional. Limit the number of functions/classes/exports returned. Default 50.
 Key Behavior:
 - Identifies Top-Level Functions, Classes, Exported Variables/Functions.
@@ -70,7 +70,7 @@ Key Behavior:
 Tool: format_code
 Description: Standard code formatter using Prettier.
 Input:
-- code (string): The code to format.
+- code (string): The code to format (Max 50MB).
 - parser (enum): 'babel' (for JS/TS), 'html', or 'css'.
 `,
   get_help: `

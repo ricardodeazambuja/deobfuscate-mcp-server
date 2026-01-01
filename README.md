@@ -65,7 +65,11 @@ Alternatively, edit `~/Library/Application Support/Claude/claude_desktop_config.
 ```
 
 ### Gemini CLI
-Edit `~/.gemini/settings.json`:
+Run the following command in your terminal:
+```bash
+gemini mcp add deobfuscate-mcp-server npx -y deobfuscate-mcp-server
+```
+Alternatively, edit `~/.gemini/settings.json`:
 ```json
 {
   "mcpServers": {

@@ -12,7 +12,8 @@ import {
   getSymbolSource,
   getHelp,
   TOOL_DOCS,
-  MAX_CODE_SIZE
+  MAX_CODE_SIZE,
+  DEFAULT_LIMIT
 } from "./tools.js";
 
 const server = new McpServer({
@@ -23,7 +24,7 @@ const server = new McpServer({
 // Register tools using the high-level McpServer.tool API
 server.tool(
   "deobfuscate",
-  "Unpacks/deobfuscates minified code & caches result. (See get_help)",
+  "Unpacks/deobfuscates minified code & caches result.",
   {
     code: z.string().max(MAX_CODE_SIZE, `Input code too large (max ${MAX_CODE_SIZE / 1024 / 1024}MB)`),
     unbundle: z.boolean().optional().default(true)
@@ -36,7 +37,7 @@ server.tool(
 
 server.tool(
   "list_modules",
-  "Lists modules from cached bundle. (See get_help)",
+  "Lists modules from cached bundle.",
   {
     excludeVendor: z.boolean().optional().default(false)
   },
@@ -48,7 +49,7 @@ server.tool(
 
 server.tool(
   "get_module",
-  "Gets code for specific module ID from cache. (See get_help)",
+  "Gets code for specific module ID from cache.",
   {
     id: z.string()
   },
@@ -60,11 +61,11 @@ server.tool(
 
 server.tool(
   "search_modules",
-  "Searches text/regex in cached modules. (See get_help)",
+  "Searches text/regex in cached modules.",
   {
     query: z.string(),
     isRegex: z.boolean().optional().default(false),
-    limit: z.number().optional().default(50)
+    limit: z.number().optional().default(DEFAULT_LIMIT)
   },
   async ({ query, isRegex, limit }) => {
     const results = await searchModules(query, isRegex, limit);
@@ -74,10 +75,10 @@ server.tool(
 
 server.tool(
   "analyze_structure",
-  "Returns structural summary (AST) of code. (See get_help)",
+  "Returns structural summary (AST) of code.",
   {
     code: z.string().max(MAX_CODE_SIZE, `Input code too large (max ${MAX_CODE_SIZE / 1024 / 1024}MB)`),
-    limit: z.number().optional().default(50)
+    limit: z.number().optional().default(DEFAULT_LIMIT)
   },
   async ({ code, limit }) => {
     const structure = await analyzeStructure(code, limit);
@@ -87,7 +88,7 @@ server.tool(
 
 server.tool(
   "get_symbol_source",
-  "Extracts specific function/class source code. (See get_help)",
+  "Extracts specific function/class source code.",
   {
     symbolName: z.string(),
     code: z.string().optional(),
@@ -101,7 +102,7 @@ server.tool(
 
 server.tool(
   "format_code",
-  "Formats code with Prettier. (See get_help)",
+  "Formats code with Prettier.",
   {
     code: z.string().max(MAX_CODE_SIZE, `Input code too large (max ${MAX_CODE_SIZE / 1024 / 1024}MB)`),
     parser: z.enum(["babel", "html", "css"]).optional().default("babel")

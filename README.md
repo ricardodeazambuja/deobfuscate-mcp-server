@@ -17,6 +17,7 @@ Standard "beautifiers" only format code, leaving LLMs to struggle with massive, 
 - **`analyze_structure`**: Returns a high-level AST summary (functions, classes, exports) to save tokens.
 - **`list_modules`**: Lists all modules found in the unpacked bundle.
 - **`get_module`**: Fetches the formatted source code of a single module.
+- **`get_symbol_source`**: Extracts only a specific function, class, or variable to save tokens.
 - **`search_modules`**: Regex/String search across all modules.
 - **`format_code`**: Standard Prettier formatting for JS/HTML/CSS.
 - **`get_help`**: Returns detailed documentation for any tool.
@@ -125,6 +126,9 @@ node dist/index.js
 5.  **LLM**: "Where is the 'login' function defined?"
 6.  **LLM**: Calls `search_modules(query="function login")`.
     *   *Server*: "Found in module 88."
+7.  **LLM**: "I just want to see the login function logic."
+8.  **LLM**: Calls `get_symbol_source(symbolName="login", moduleId="88")`.
+    *   *Server*: Returns only the source for the 'login' function.
 
 ## Development
 

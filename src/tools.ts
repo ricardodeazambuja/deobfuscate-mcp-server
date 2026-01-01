@@ -7,10 +7,25 @@ import { format } from "prettier";
 
 const traverse = _traverse.default;
 
-// Shared state for the session
+// Shared state and constants
 export const MAX_CODE_SIZE = 50 * 1024 * 1024; // 50MB
+export const DEFAULT_LIMIT = 50;
+
+export const BABEL_PARSER_OPTIONS: parser.ParserOptions = {
+  sourceType: "module",
+  plugins: ["jsx", "typescript"],
+};
+
+export const PRETTIER_OPTIONS: any = {
+  parser: "babel",
+  semi: true,
+  singleQuote: true,
+};
+
+const MAX_MB = `${MAX_CODE_SIZE / 1024 / 1024}MB`;
+
 export const state = {
-  lastBundle: null as any // Using any for bundle to avoid type issues
+  lastBundle: null as any
 };
 
 export const TOOL_DOCS = {
@@ -22,7 +37,7 @@ Key Behavior:
 - Caches the unbundled modules in memory for subsequent use by 'list_modules', 'get_module', and 'search_modules'.
 - Returns the main entry point code and a summary of the operation.
 Input:
-- code (string): The raw minified code (Max 50MB).
+- code (string): The raw minified code (Max ${MAX_MB}).
 - unbundle (boolean): Default true. Set to false if you only want variable renaming without bundle splitting.
 `,
   list_modules: `
@@ -50,7 +65,7 @@ Description: Scans all cached modules for a specific text string or regular expr
 Input:
 - query (string): The text or regex pattern to search for.
 - isRegex (boolean): Default false. Treat 'query' as a JS RegExp if true.
-- limit (number): Optional. Max number of results to return. Default 50.
+- limit (number): Optional. Max number of results to return. Default ${DEFAULT_LIMIT}.
 Key Behavior:
 - Useful for finding where specific constants, API keys, or function names are defined across a large bundle.
 - Returns a list of matches with module IDs and paths.
@@ -59,8 +74,8 @@ Key Behavior:
 Tool: analyze_structure
 Description: Performs a static analysis (AST) of the provided code to generate a high-level architectural summary.
 Input:
-- code (string): The JS code to analyze (Max 50MB).
-- limit (number): Optional. Limit the number of functions/classes/exports returned. Default 50.
+- code (string): The JS code to analyze (Max ${MAX_MB}).
+- limit (number): Optional. Limit the number of functions/classes/exports returned. Default ${DEFAULT_LIMIT}.
 Key Behavior:
 - Identifies Top-Level Functions, Classes, Exported Variables/Functions.
 - Returns a JSON summary.
@@ -70,7 +85,7 @@ Key Behavior:
 Tool: format_code
 Description: Standard code formatter using Prettier.
 Input:
-- code (string): The code to format (Max 50MB).
+- code (string): The code to format (Max ${MAX_MB}).
 - parser (enum): 'babel' (for JS/TS), 'html', or 'css'.
 `,
   get_help: `
@@ -84,13 +99,20 @@ Tool: get_symbol_source
 Description: Extracts the source code of a specific function, class, or variable from a module or provided code snippet.
 Input:
 - symbolName (string): The name of the symbol to extract.
-- code (string): Optional. The source code to search in.
+- code (string): Optional. The source code to search in (Max ${MAX_MB}).
 - moduleId (string): Optional. The ID of the module in the cached bundle to search in.
 Key Behavior:
 - Saves tokens by returning only the requested symbol instead of the entire file.
 - Uses AST parsing to accurately locate the symbol.
 `
 };
+
+/**
+ * Helper to format code consistently
+ */
+async function formatJS(code: string) {
+  return await format(code, PRETTIER_OPTIONS);
+}
 
 export async function getSymbolSource(symbolName: string, code?: string, moduleId?: string) {
   let sourceCode = code;
@@ -103,10 +125,7 @@ export async function getSymbolSource(symbolName: string, code?: string, moduleI
 
   if (!sourceCode) throw new Error("Either 'code' or 'moduleId' must be provided.");
 
-  const ast = parser.parse(sourceCode, {
-    sourceType: 'module',
-    plugins: ['jsx', 'typescript'],
-  });
+  const ast = parser.parse(sourceCode, BABEL_PARSER_OPTIONS);
 
   let foundCode: string | null = null;
 
@@ -119,7 +138,6 @@ export async function getSymbolSource(symbolName: string, code?: string, moduleI
         if (path.node.id?.name === symbolName) match = true;
       } else if (path.isVariableDeclarator()) {
         if (t.isIdentifier(path.node.id) && path.node.id.name === symbolName) {
-          // If it's a variable declarator, we might want the whole declaration (const/let)
           if (path.parentPath.isVariableDeclaration()) {
             path = path.parentPath;
           }
@@ -138,19 +156,12 @@ export async function getSymbolSource(symbolName: string, code?: string, moduleI
 
   if (!foundCode) throw new Error(`Symbol '${symbolName}' not found.`);
 
-  return await format(foundCode, {
-    parser: 'babel',
-    semi: true,
-    singleQuote: true,
-  });
+  return await formatJS(foundCode);
 }
 
-export async function analyzeStructure(code: string, limit: number = 50) {
+export async function analyzeStructure(code: string, limit: number = DEFAULT_LIMIT) {
   try {
-    const ast = parser.parse(code, {
-      sourceType: "module",
-      plugins: ["jsx", "typescript"],
-    });
+    const ast = parser.parse(code, BABEL_PARSER_OPTIONS);
 
     const structure: any = {
       functions: [] as string[],
@@ -208,7 +219,7 @@ export async function deobfuscate(code: string, unbundle: boolean = true) {
     responseText = "// Unbundled " + result.bundle.modules.size + " modules.\n// Use 'list_modules' to see them all.\n// Main entry point:\n" + result.code;
   }
 
-  return await format(responseText, { parser: "babel", semi: true, singleQuote: true });
+  return await formatJS(responseText);
 }
 
 function isVendorModule(path: string): boolean {
@@ -255,10 +266,10 @@ export async function getModule(id: string) {
   if (!module) {
     throw new Error(`Module ${id} not found.`);
   }
-  return await format(module.code, { parser: "babel", semi: true, singleQuote: true });
+  return await formatJS(module.code);
 }
 
-export async function searchModules(query: string, isRegex: boolean = false, limit: number = 50) {
+export async function searchModules(query: string, isRegex: boolean = false, limit: number = DEFAULT_LIMIT) {
   if (!state.lastBundle) {
     throw new Error("No bundle found. Run 'deobfuscate' first.");
   }

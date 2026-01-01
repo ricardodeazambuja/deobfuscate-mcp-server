@@ -8,7 +8,7 @@ import { format } from "prettier";
 const traverse = _traverse.default;
 
 // Shared state for the session
-export const MAX_CODE_SIZE = 1024 * 1024; // 1MB
+export const MAX_CODE_SIZE = 50 * 1024 * 1024; // 50MB
 export const state = {
   lastBundle: null as any // Using any for bundle to avoid type issues
 };

@@ -23,8 +23,15 @@ Standard "beautifiers" only format code, leaving LLMs to struggle with massive, 
 
 ## Installation & Setup
 
+### Install from npm (Recommended)
+```bash
+npm install -g deobfuscate-mcp-server
+```
+
 ### Build from source
 ```bash
+git clone https://github.com/ricardodeazambuja/deobfuscate-mcp-server.git
+cd deobfuscate-mcp-server
 npm install
 npm run build
 ```
@@ -38,20 +45,20 @@ npm install -g ./deobfuscate-mcp-server-1.0.0.tgz
 
 ## Client Configuration
 
-To use this server with your favorite LLM client, add the following configuration. Replace `ABSOLUTE_PATH_TO_DIST` with the actual absolute path to `dist/index.js` on your machine.
+To use this server with your favorite LLM client, add the following configuration.
 
 ### Claude Code
 Run the following command in your terminal:
 ```bash
-claude mcp add deobfuscate-mcp-server -- node ABSOLUTE_PATH_TO_DIST/index.js
+claude mcp add deobfuscate-mcp-server -- npx -y deobfuscate-mcp-server
 ```
 Alternatively, edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
     "deobfuscate-mcp-server": {
-      "command": "node",
-      "args": ["ABSOLUTE_PATH_TO_DIST/index.js"]
+      "command": "npx",
+      "args": ["-y", "deobfuscate-mcp-server"]
     }
   }
 }
@@ -63,8 +70,8 @@ Edit `~/.gemini/settings.json`:
 {
   "mcpServers": {
     "deobfuscate-mcp-server": {
-      "command": "node",
-      "args": ["ABSOLUTE_PATH_TO_DIST/index.js"]
+      "command": "npx",
+      "args": ["-y", "deobfuscate-mcp-server"]
     }
   }
 }
@@ -76,12 +83,20 @@ Google Antigravity typically uses a similar configuration to Gemini. Edit `~/.an
 {
   "mcpServers": {
     "deobfuscate-mcp-server": {
-      "command": "node",
-      "args": ["ABSOLUTE_PATH_TO_DIST/index.js"]
+      "command": "npx",
+      "args": ["-y", "deobfuscate-mcp-server"]
     }
   }
 }
 ```
+
+### Development / Local Usage
+If you are running the server from the source code, replace the command with:
+```json
+"command": "node",
+"args": ["ABSOLUTE_PATH_TO_DIST/index.js"]
+```
+*(Replace `ABSOLUTE_PATH_TO_DIST` with the actual absolute path to the `dist` folder on your machine)*
 
 ## Usage
 
